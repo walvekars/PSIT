@@ -1,0 +1,478 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+	<data>
+
+	 <!-- Update account invoice tree view!-->
+        <record id="account_invoice_tree_inherited" model="ir.ui.view">
+            <field name="name">account.invoice.tree</field>
+            <field name="model">account.invoice</field>
+            <field name="inherit_id" ref="account.invoice_tree"/>
+            <field name="groups_id" eval="[(6,0, [ref('account.group_account_invoice')])]"/>       
+            <field name="arch" type="xml">
+
+             <xpath expr="//field[@name='number']" position="after">
+		    <field name="supplier_invoice_number" string="Invoice Number" invisible="context.get('in_invoice',False)" />
+		    <field name="amount_cgst" string="Total CGST" help="9% CGST"/>
+		    <field name="amount_sgst" string="Total SGST" help="9% SGST"/>
+		    <field name="amount_igst" string="Total IGST" help="18% IGST"/>
+	            <field name="amount_tax" string="Tax Amount"/>
+             </xpath>
+
+             <xpath expr="//field[@name='amount_total']" position="replace">
+		    <field name="rounded_total"/>
+             </xpath>
+
+
+             <xpath expr="//field[@name='user_id']" position="replace">
+		    <field name="user_id" invisible="1"/>
+             </xpath>
+
+             <xpath expr="//field[@name='section_id']" position="replace">
+		    <field name="section_id" invisible="1"/>
+             </xpath>
+
+             <xpath expr="//field[@name='origin']" position="replace">
+		    <field name="origin" invisible="1"/>
+             </xpath>
+
+             <xpath expr="//field[@name='date_due']" position="replace">
+		    <field name="date_due" invisible="1"/>
+             </xpath>
+
+             <xpath expr="//field[@name='currency_id']" position="replace">
+		    <field name="currency_id" invisible="1"/>
+             </xpath>
+
+             <xpath expr="//field[@name='residual']" position="replace">
+		    <field name="residual" invisible="1"/>
+             </xpath>
+
+            </field>
+        </record>
+
+        <record id="sale_orders_tree_inherited" model="ir.ui.view">
+            <field name="name">sale.order.tree</field>
+            <field name="model">sale.order</field>
+            <field name="inherit_id" ref="sale.view_order_tree"/>
+            <field name="arch" type="xml">
+
+             <xpath expr="//field[@name='name']" position="replace">
+		    <field name="name" string="Order No"/>
+           </xpath>
+
+             <xpath expr="//field[@name='name']" position="after">
+		    <field name="x_customer_po_no" string="Customer PO No"/>
+           </xpath>
+
+           <xpath expr="//field[@name='user_id']" position="replace">
+		    <field name="user_id" invisible="1"/>
+           </xpath>
+
+             <xpath expr="//field[@name='user_id']" position="after">
+		    <field name="amount_untaxed" string="Untaxed Amount"/>
+           </xpath>
+
+             <xpath expr="//field[@name='amount_total']" position="before">
+		    <field name="amount_tax" string="Tax Amount"/>
+           </xpath>
+
+            </field>
+        </record>
+
+        <record id="sale_orders_form_inherited" model="ir.ui.view">
+            <field name="name">sale.order.form</field>
+            <field name="model">sale.order</field>
+            <field name="inherit_id" ref="sale.view_order_form"/>
+            <field name="arch" type="xml">
+             <xpath expr="//field[@name='project_id']" position="after">
+	            <field name="x_customer_po_no" required = "1" attrs="{'readonly': [('state','in',['progress','done','cancel'])]}" />
+	            <field name="x_customer_po_date" required = "1" attrs="{'readonly': [('state','in',['progress','done','cancel'])]}"/>
+             </xpath>
+             <xpath expr="//button[@name='action_button_confirm']" position="attributes">
+                  <attribute name="groups">base.group_sale_manager</attribute>
+              </xpath>   
+             <xpath expr="//button[@name='action_cancel']" position="attributes">
+                  <attribute name="groups">base.group_sale_manager</attribute>
+              </xpath>    
+             <xpath expr="//button[@name='invoice_cancel']" position="attributes">
+                  <attribute name="groups">base.group_sale_manager</attribute>
+              </xpath>     
+            </field>
+        </record>
+
+        <record id="sale_orders_field_inherited" model="ir.ui.view">
+            <field name="name">sale.order.form</field>
+            <field name="model">sale.order</field>
+            <field name="inherit_id" ref="sale_journal.sale_journal_sale_order_tree"/>
+            <field name="arch" type="xml">
+             <xpath expr="//field[@name='invoice_type_id']" position="replace">
+	            <field name="invoice_type_id" invisible="1"/>
+             </xpath>
+            </field>
+        </record>
+
+
+        <record id="pur_orders_form_inherited" model="ir.ui.view">
+            <field name="name">purchase.order.form</field>
+            <field name="model">purchase.order</field>
+            <field name="inherit_id" ref="purchase.purchase_order_form"/>
+            <field name="arch" type="xml">
+                 <xpath expr="//button[@name='purchase_confirm']" position="attributes">
+                        <attribute name="groups">purchase.group_purchase_manager</attribute>
+		    </xpath>
+                 <xpath expr="//button[@name='view_picking']" position="attributes">
+                        <attribute name="groups">purchase.group_purchase_manager</attribute>
+		    </xpath> 
+                 <xpath expr="//button[@name='view_invoice']" position="attributes">
+                        <attribute name="groups">purchase.group_purchase_manager</attribute>
+		    </xpath>
+                 <xpath expr="//button[@name='action_cancel']" position="attributes">
+                        <attribute name="groups">purchase.group_purchase_manager</attribute>
+		    </xpath>    
+            </field>
+        </record>
+   
+
+        <record id="purchase_orders_tree_inherits" model="ir.ui.view">
+            <field name="name">purchase.order.tree</field>
+            <field name="model">purchase.order</field>
+            <field name="inherit_id" ref="purchase.purchase_order_tree"/>
+            <field name="arch" type="xml">
+
+             <xpath expr="//field[@name='date_order']" position="replace">
+		    <field name="date_order" string="Order Date"/>
+             </xpath>
+
+             <xpath expr="//field[@name='origin']" position="replace">
+		    <field name="origin" invisible="1"/>
+             </xpath>
+
+             <xpath expr="//field[@name='amount_untaxed']" position="after">
+		    <field name="amount_tax" string="Tax Amount"/>
+             </xpath>
+
+            </field>
+        </record>
+
+
+        <record id="product_template_tree_inherits" model="ir.ui.view">
+            <field name="name">product.template.tree</field>
+            <field name="model">product.template</field>
+            <field name="inherit_id" ref="product.product_template_tree_view"/>
+            <field name="arch" type="xml">
+
+            <xpath expr="//field[@name='categ_id']" position="replace">
+		    <field name="categ_id" invisible="1"/>
+            </xpath>
+
+            <xpath expr="//field[@name='type']" position="replace">
+		    <field name="type" invisible="1"/>
+            </xpath>
+
+            <xpath expr="//field[@name='uom_id']" position="replace">
+		    <field name="uom_id" invisible="1"/>
+            </xpath>
+
+            </field>
+        </record>
+
+        <record id="product_template_action" model="ir.actions.act_window">
+            <field name="name">Products</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">product.template</field>
+            <field name="view_mode">kanban,tree</field>
+            <field name="view_type">form</field>
+            <field name="inherit_id" ref="product.product_template_kanban_view"/>
+            <field name="context">{"search_default_filter_to_sell":1}</field>
+        </record>
+
+        <menuitem action="product_template_action"
+            id="menu_product_template_action"
+            parent="base.menu_product" sequence="2" />
+
+
+	<record model="ir.ui.view" id="stock_move_form_inherits">
+		 <field name="name">stock.move.form</field>       
+		 <field name="model">stock.move</field>
+		 <field name="inherit_id" ref="stock.view_move_form"/>
+		 <field name="groups_id" eval="[(6,0, [ref('stock.group_stock_user')])]"/>              
+		 <field name="arch" type="xml">          
+
+                 <xpath expr="//button[@name='action_confirm']" position="attributes">
+                        <attribute name="groups">mrp.group_mrp_manager</attribute>
+		    </xpath> 
+ 
+                 <xpath expr="//button[@name='action_done']" position="attributes">
+                        <attribute name="groups">mrp.group_mrp_manager</attribute>
+		    </xpath>  
+
+                 <xpath expr="//button[@name='force_assign']" position="attributes">
+                        <attribute name="groups">mrp.group_mrp_manager</attribute>
+		    </xpath> 
+
+                 <xpath expr="//button[@name='action_cancel']" position="attributes">
+                        <attribute name="groups">mrp.group_mrp_manager</attribute>
+		    </xpath>   
+    
+		 </field>   
+	</record>
+
+
+	<record model="ir.ui.view" id="stock_move_tree_view_inherited">
+		 <field name="name">stock.move.tree</field>       
+		 <field name="model">stock.move</field>
+		 <field name="inherit_id" ref="stock.view_move_tree"/>       
+		 <field name="arch" type="xml">          
+		<xpath expr="/tree" position="replace">
+                     <tree colors="grey:state == 'cancel'" string="Moves">
+			    <field name="date"/>
+			    <field name="product_id"/>
+			    <field name="origin"/>
+			    <field name="product_uom_qty"/>
+			    <field name="product_uom"/>
+			    <field name="location_id"/>
+			    <field name="location_dest_id"/>
+			    <field name="state"/>
+                     </tree>
+		    </xpath>       
+		 </field>   
+	</record>
+
+
+	<record model="ir.ui.menu" id="stock.menu_quants">
+	    <field name="name">Quants and Values</field>
+	</record>
+
+
+        <record id="action_invoice_tree2" model="ir.actions.act_window.view">
+            <field name="type">ir.actions.act_window</field>
+            <field name="name">Supplier Invoices</field>
+            <field name="res_model">account.invoice</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree</field>
+            <field name="domain">[('type','=','in_invoice')]</field>  
+            <field name="context">{'supplier_invoice_number':True}</field>
+            <field name="inherit_id" ref="account.action_invoice_tree1"/>
+        </record>
+
+
+	<record model="ir.ui.view" id="mrp_production_form_view_inheritss">
+		 <field name="name">mrp.production.form</field>       
+		 <field name="model">mrp.production</field>       
+		 <field name="inherit_id" ref="mrp.mrp_production_form_view"/>       
+		 <field name="arch" type="xml">   
+                    <xpath expr="//button[@name='button_confirm']" position="attributes">
+                        <attribute name="groups">mrp.group_mrp_manager</attribute>
+		    </xpath>
+
+                    <xpath expr="//button[@name='428']" position="attributes">
+                        <attribute name="groups">mrp.group_mrp_manager</attribute>
+		    </xpath>   
+
+                    <xpath expr="//button[@name='action_assign']" position="attributes">
+                        <attribute name="groups">mrp.group_mrp_manager</attribute>
+		    </xpath>   
+    
+                    <xpath expr="//button[@name='force_production']" position="attributes">
+                        <attribute name="groups">mrp.group_mrp_manager</attribute>
+		    </xpath>  
+     
+                    <xpath expr="//button[@name='button_produce']" position="attributes">
+                        <attribute name="groups">mrp.group_mrp_manager</attribute>
+		    </xpath>   
+    
+                    <xpath expr="//button[@name='button_cancel']" position="attributes">
+                        <attribute name="groups">mrp.group_mrp_manager</attribute>
+		    </xpath>  
+     
+                    <xpath expr="//button[@name='action_cancel']" position="attributes">
+                        <attribute name="groups">mrp.group_mrp_manager</attribute>
+		    </xpath>       
+       
+		 </field>   
+	</record>
+
+
+	<record model="ir.ui.view" id="mrp_production_workcenter_inherit">
+		 <field name="name">mrp.production.workcenter.line.form</field>       
+		 <field name="model">mrp.production.workcenter.line</field>       
+		 <field name="inherit_id" ref="mrp_operations.mrp_production_workcenter_form_view_inherit"/>       
+		 <field name="arch" type="xml">  
+ 
+                 <xpath expr="//button[@name='button_start_working']" position="attributes">
+                        <attribute name="groups">mrp.group_mrp_manager</attribute>
+		    </xpath>  
+                 <xpath expr="//button[@name='button_resume']" position="attributes">
+                        <attribute name="groups">mrp.group_mrp_manager</attribute>
+		    </xpath>          
+
+                 <xpath expr="//button[@name='button_done']" position="attributes">
+                        <attribute name="groups">mrp.group_mrp_manager</attribute>
+		    </xpath>          
+
+                 <xpath expr="//button[@name='button_pause']" position="attributes">
+                        <attribute name="groups">mrp.group_mrp_manager</attribute>
+		    </xpath>          
+
+                 <xpath expr="//button[@name='button_draft']" position="attributes">
+                        <attribute name="groups">mrp.group_mrp_manager</attribute>
+		    </xpath>   
+
+                 <xpath expr="//button[@name='button_cancel']" position="attributes">
+                        <attribute name="groups">mrp.group_mrp_manager</attribute>
+		    </xpath>                 
+        
+		 </field>   
+	</record>
+
+
+	<record model="ir.ui.view" id="account_invoice_form_view_inherits">
+		 <field name="name">account.invoice.form</field>       
+		 <field name="model">account.invoice</field>       
+		 <field name="inherit_id" ref="account.invoice_form"/>       
+		 <field name="groups_id" eval="[(6,0, [ref('account.group_account_invoice')])]"/>       
+		 <field name="arch" type="xml">
+
+                     <xpath expr="//button[@name='invoice_open']" position="attributes">
+                        <attribute name="groups">account.group_account_user</attribute>
+		    </xpath>
+
+                     <xpath expr="//button[@name='invoice_proforma2']" position="attributes">
+                        <attribute name="groups">account.group_account_user</attribute>
+		    </xpath>  
+        
+                     <xpath expr="//button[@name='268']" position="attributes">
+                        <attribute name="groups">account.group_account_user</attribute>
+		    </xpath>
+          
+                     <xpath expr="//button[@name='invoice_cancel']" position="attributes">
+                        <attribute name="groups">account.group_account_user</attribute>
+		    </xpath>  
+        
+                     <xpath expr="//button[@name='action_cancel_draft']" position="attributes">
+                        <attribute name="groups">account.group_account_user</attribute>
+		    </xpath>
+
+                     <xpath expr="//button[@name='282']" position="attributes">
+                        <attribute name="groups">account.group_account_user</attribute>
+		    </xpath>  
+                      
+		 </field>   
+	</record>
+
+
+	<record model="ir.ui.view" id="account_sup_invoice_form_view_inherits">
+		 <field name="name">account.invoice.supplier.form</field>       
+		 <field name="model">account.invoice</field>       
+		 <field name="inherit_id" ref="account.invoice_supplier_form"/>       
+		 <field name="groups_id" eval="[(6,0, [ref('account.group_account_invoice')])]"/>       
+		 <field name="arch" type="xml"> 
+                    <xpath expr="//button[@name='invoice_open']" position="attributes">
+                        <attribute name="groups">account.group_account_user</attribute>
+		    </xpath>          
+		 </field>   
+	</record>
+
+
+	<record model="ir.ui.view" id="account_voucher_form_view_inherits1">
+		 <field name="name">account.voucher.receipt.form</field>       
+		 <field name="model">account.voucher</field>       
+		 <field name="inherit_id" ref="account_voucher.view_vendor_receipt_form"/>       
+		 <field name="arch" type="xml">          
+                    <xpath expr="//button[@name='proforma_voucher']" position="attributes">
+                        <attribute name="groups">account.group_account_user</attribute>
+		    </xpath>
+                    <xpath expr="//button[@name='cancel_voucher']" position="attributes">
+                        <attribute name="groups">account.group_account_user</attribute>
+		    </xpath>  
+                    <xpath expr="//button[@name='action_cancel_draft']" position="attributes">
+                        <attribute name="groups">account.group_account_user</attribute>
+		    </xpath>
+                    <xpath expr="//field[@name='journal_id']" position="after">
+		        <field name="x_instrument" string="Instrument"/>
+		    </xpath>
+	         </field>   
+	</record>
+
+
+	<record model="ir.ui.view" id="account_voucher_form_view_inherits2">
+		 <field name="name">account.voucher.form</field>       
+		 <field name="model">account.voucher</field>       
+		 <field name="inherit_id" ref="account_voucher.view_sale_receipt_form"/>       
+		 <field name="arch" type="xml">          
+                    <xpath expr="//button[@name='proforma_voucher']" position="attributes">
+                        <attribute name="groups">account.group_account_user</attribute>
+		    </xpath>
+                    <xpath expr="//button[@name='342']" position="attributes">
+                        <attribute name="groups">account.group_account_user</attribute>
+		    </xpath>  
+                     <xpath expr="//button[@name='cancel_voucher']" position="attributes">
+                        <attribute name="groups">account.group_account_user</attribute>
+		    </xpath>
+                    <xpath expr="//field[@name='journal_id']" position="after">
+		        <field name="x_instrument" string="Instrument"/>
+		    </xpath>    
+	         </field>   
+	</record>
+
+
+	<record model="ir.ui.view" id="account_voucher_form_view_inherits3">
+		 <field name="name">account.voucher.purchase.form</field>       
+		 <field name="model">account.voucher</field>       
+		 <field name="inherit_id" ref="account_voucher.view_purchase_receipt_form"/>       
+		 <field name="arch" type="xml">          
+                    <xpath expr="//button[@name='proforma_voucher']" position="attributes">
+                        <attribute name="groups">account.group_account_user</attribute>
+		    </xpath>
+                    <xpath expr="//button[@name='344']" position="attributes">
+                        <attribute name="groups">account.group_account_user</attribute>
+		    </xpath>  
+                    <xpath expr="//button[@name='cancel_voucher']" position="attributes">
+                        <attribute name="groups">account.group_account_user</attribute>
+		    </xpath> 
+                    <xpath expr="//field[@name='journal_id']" position="after">
+		        <field name="x_instrument" string="Instrument"/>
+		    </xpath>    
+	       </field>   
+	</record>
+
+
+	<record model="ir.ui.view" id="account_voucher_form_view_inherits4">
+		 <field name="name">account.voucher.payment.form</field>       
+		 <field name="model">account.voucher</field>       
+		 <field name="inherit_id" ref="account_voucher.view_vendor_payment_form"/>       
+		 <field name="arch" type="xml">
+                    <xpath expr="//field[@name='journal_id']" position="after">
+		        <field name="x_instrument" string="Instrument"/>
+		    </xpath>           
+                    <xpath expr="//button[@name='proforma_voucher']" position="attributes">
+                        <attribute name="groups">account.group_account_user</attribute>
+		    </xpath>
+                    <xpath expr="//button[@name='action_cancel_draft']" position="attributes">
+                        <attribute name="groups">account.group_account_user</attribute>
+		    </xpath>  
+                    <xpath expr="//button[@name='cancel_voucher']" position="attributes">
+                        <attribute name="groups">account.group_account_user</attribute>
+		    </xpath>
+	       </field>   
+	</record>
+
+
+	<record model="ir.ui.view" id="stock_inventory_form_inherits">
+		 <field name="name">stock.inventory.form</field>       
+		 <field name="model">stock.inventory</field>
+		 <field name="inherit_id" ref="stock.view_inventory_form"/>
+		 <field name="arch" type="xml">          
+                    <xpath expr="//field[@name='filter']" position="after">
+		      <field name="description" string="Description" />
+		    </xpath> 
+		 </field>   
+	</record>  
+
+	</data>
+</openerp>
+
+
+ 
+
+

@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+  <data>
+
+<!-- To add new fields on job work order  -->
+        <record id="view_job_work_order_form" model="ir.ui.view">
+            <field name="name">job.work.order.form</field>
+            <field name="model">job.work.order</field>
+            <field name="arch" type="xml">
+		<form string="Job Form">
+		<header>
+			<button name="button_confirm" string="Confirm" type="object" states="new" class="oe_highlight"/>
+			<field name="state" widget="statusbar" statusbar_visible="new,work_order" statusbar_colors='{"new":"red","work_order":"blue"}' readonly="1"/>
+                </header>
+		<sheet>
+		
+                     <div class="oe_title">
+                        <h2>
+                            <label string="Job Work Order"/>
+                            <field name="name" class="oe_inline" readonly="1" context="{'date':'oo'}" attrs="{'readonly': [('state','not in',('new'))]}"/>
+                        </h2>
+                    </div>
+                    <group>
+		    <group colspan="4" col="4">
+		    <field name="supplier" attrs="{'readonly': [('state','not in',('new'))]}"/>
+		    <field name="sup_ref" attrs="{'readonly': [('state','not in',('new'))]}"/>
+		    <field name="pricelist_id" attrs="{'readonly': [('state','not in',('new'))]}"/>
+	            <field name="date" attrs="{'readonly': [('state','not in',('new'))]}"/>
+		    <field name="order" attrs="{'readonly': [('state','not in',('new'))]}"/>
+		    <field name="product_id" readonly="1"/>
+		    </group>
+		    <group>
+		    <notebook>
+		    <page string="Lines">
+		    <field name="line" nolable ="1" attrs="{'readonly': [('state','not in',('new'))]}">
+		     
+		    <tree editable="top">
+		    
+		    <field name="name" on_change="onchange_product_change(name)"/>
+		    <field name="description" invisible = "1" />
+		    <field name="quantity"/>
+	            <field name="unit_price"/>
+	            <field name="taxes_id" widget="many2many_tags"
+                                    domain="[('parent_id','=',False),('type_tax_use','!=','sale')]"/>
+	            <field name="tot" string="Total" sum = "total"/>
+	         
+	            </tree>
+	            </field>
+	             <group class="oe_subtotal_footer oe_right">
+			<field name="amount_untaxed" widget="monetary" />
+			<field name="amount_tax" widget="monetary" />
+			<div class="oe_subtotal_footer_separator oe_inline">
+			    <label for="amount_total"/>
+			    <button name="button_dummy" string="(update)" type="object" class="oe_edit_only oe_link"/>
+			</div>
+			<field name="amount_total" nolabel="1" class="oe_subtotal_footer_separator" widget="monetary" />
+                    </group>
+	            </page>
+	            </notebook>
+	            </group>
+	            		    		    		  
+                    </group>
+                  
+		    </sheet>
+		    
+          	</form>
+            </field>
+        </record>
+
+          <record id="view_job_work_order_tree" model="ir.ui.view">
+            <field name="name">job.work.order.tree</field>
+            <field name="model">job.work.order</field>
+            <field name="arch" type="xml">
+		<tree string="Job Work Order tree" >
+                    <field name="name" />
+	            <field name="date"/>
+		    <field name='order'/>
+		    <field name='product_id'/>
+		    <field name="supplier"/>
+		    <field name="state" />
+          	</tree>
+            </field>             
+        </record>
+        
+        
+        <record id="view_parent_product_inherit_form" model="ir.ui.view">
+            <field name="name">product.product.form</field>
+            <field name="model">product.product</field>
+            <field name="inherit_id" ref="product.product_normal_form_view"/>
+            <field name="arch" type="xml">
+               <field name="list_price" position = "after" > 		
+                   <field name="parent_id" attrs="{'invisible':[('type','!=','service')],'required':[('type','=','service')]}" />
+               </field>
+             </field>
+         </record>
+   
+        <record id="view_parent_product_template_inherit_form" model="ir.ui.view">
+            <field name="name">product.template.form</field>
+            <field name="model">product.template</field>
+            <field name="inherit_id" ref="product.product_template_only_form_view"/>
+            <field name="arch" type="xml">
+               <field name="list_price" position = "after" > 		
+                   <field name="parent_id" attrs="{'invisible':[('type','!=','service')],'required':[('type','=','service')]}" />
+               </field>
+            </field>
+        </record>
+
+        <record id="view_job_work_filter" model="ir.ui.view">
+            <field name="name">job.work.order.select</field>
+            <field name="model">job.work.order</field>
+            <field name="arch" type="xml">
+                <search string="Search Invoice">
+                  <field name="supplier" />
+                  <field name="name" />
+		<group expand="0" string="Group By">
+                    	<filter name="group_by_supplier" string="Partner" context="{'group_by':'supplier'}"/>
+                    	<filter name="group_by_name" string="Job Order" context="{'group_by':'name'}"/>
+                    </group>
+               </search>
+            </field>
+        </record>
+
+     <record id="job_work_order_menu" model="ir.actions.act_window">
+            <field name="name">Job work order</field>
+            <field name="res_model">job.work.order</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="context">{'default_type': 'in_refund', 'type': 'in_refund', 'journal_type': 'purchase_refund'}</field>
+
+              
+           
+        </record>
+      <menuitem action="job_work_order_menu" id="menu_job_work_order_menu" name="Job Work Order" sequence="13" parent="purchase.menu_procurement_management" />
+ 
+         <!-- Sequences for job.work.order -->
+        <record id="seq_type_job_work_order" model="ir.sequence.type">
+            <field name="name">Job Work Order</field>
+            <field name="code">job.work.order</field>
+        </record>
+
+        <record id="seq_sale_order" model="ir.sequence">
+            <field name="name">Job Work Order</field>
+            <field name="code">job.work.order</field>
+            <field name="prefix"></field>
+            <field name="padding">3</field>
+            <field name="company_id" eval="False"/>
+        </record>
+          
+  </data> 
+</openerp> 

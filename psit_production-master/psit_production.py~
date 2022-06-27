@@ -1,0 +1,243 @@
+# -*- encoding: utf-8 -*-
+
+##############################################################################
+import time
+from openerp.osv import fields, osv
+from openerp.tools.translate import _
+import openerp.addons.decimal_precision as dp
+import pdb
+
+
+class mrp_production_class(osv.osv):
+
+    _inherit = "mrp.production"
+#To add new field on mrp production 
+    _columns = {
+
+	
+           }
+
+
+#Function to change stock move for routing location
+    def action_produce(self, cr, uid, production_id, production_qty, production_mode, wiz=False, context=None):
+        production = self.browse(cr, uid, production_id, context=context)
+        for produce_product in production.move_created_ids:
+            #function to change
+	    	routing = production.routing_id
+	    	if routing:
+		    	routing_loc = routing.location_id 
+			if routing_loc.usage != 'internal':
+				self.write(cr, uid, [production_id], {'location_dest_id': routing_loc.id})
+			#pdb.set_trace()
+			move_created_ids = production.move_created_ids
+			if move_created_ids:
+				   self.pool.get('stock.move').write(cr, 1, [move_created_ids[0].id], {'location_dest_id': routing_loc.id})
+				       
+        return super(mrp_production_class,self).action_produce(cr, uid, production_id, production_qty, production_mode, wiz=False, context=None)
+        
+        
+        
+
+
+#Function to write routing on bom if user selcts new routing on mrp production while confirming
+    def action_ready(self, cr, uid, ids, context=None):
+        """ Changes the production state to Ready and location id of stock move.
+        @return: True
+        """
+
+        for production in self.browse(cr, uid, ids, context=context):
+            bom_id = production.bom_id.id
+            bom_routing_id = production.bom_id.routing_id
+            routing_id = production.routing_id
+            
+            if routing_id:
+                if bom_routing_id:
+                    if routing_id.id != bom_routing_id.id:
+                        self.pool.get('mrp.bom').write(cr, uid, bom_id, {'routing_id': routing_id.id})
+                else:
+                        self.pool.get('mrp.bom').write(cr, uid, bom_id, {'routing_id': routing_id.id})
+           # if routing_id:
+	#	routing_loc = routing_id.location_id 
+	#	if routing_loc.usage != 'internal':
+               		#pdb.set_trace()
+	#		self.write(cr, uid, ids, {'location_dest_id': routing_loc.id})
+	#		move_created_ids = production.move_created_ids
+	#		if move_created_ids:
+	#		   self.pool.get('stock.move').write(cr, uid, [move_created_ids[0].id], {'location_dest_id': routing_loc.id})	
+        return super(mrp_production_class,self).action_ready(cr, uid, ids, context=context)
+
+    def action_production_end(self, cr, uid, ids, context=None):
+        """ Changes production state to Finish and writes finished date.
+        @return: True
+        """
+        
+	for production in self.browse(cr, uid, ids):
+
+	    #Code to generate Incoming Shipment and Invoice at the end of production if the routing works on supplier location
+	    routing = production.routing_id
+	    if routing:
+            	routing_loc = routing.location_id 
+        	ir_sequence = self.pool.get('ir.sequence')
+		stock_picking = self.pool.get('stock.picking')
+        	partner_id = False
+		if routing_loc.usage != 'internal':
+				labour_product = self.pool.get('product.product').search(cr, 1, [('parent_id', '=',production.product_id.id )], context=context)
+                                if not labour_product:
+					raise osv.except_osv(_('Warning!'),_('Service Product is not defined for the Job work order!'))
+				#self.write(cr, uid, ids, {'location_dest_id': routing_loc.id})
+				#move_created_ids = production.move_created_ids2
+				#if move_created_ids:
+				 #  self.pool.get('stock.move').write(cr, 1, [move_created_ids[0].id], {'location_dest_id': routing_loc.id})
+
+                		pick_type = 'in'
+            			partner_id = routing_loc.partner_id and routing_loc.partner_id.id or False
+				
+				if not partner_id:
+					raise osv.except_osv(_('Warning!'), _("Please select Routing's  Production Location Address."))
+        # Take routing address as a Shipment Address.
+        # If usage of routing location is a internal, make outgoing shipment otherwise internal shipment
+        # Take next Sequence number of shipment base on type
+				#if pick_type!='internal':
+			    	
+			    	#	pick_name = ir_sequence.get(cr, uid, 'stock.picking.' + pick_type)
+				#else:
+#			        pdb.set_trace()#	pick_name = ir_sequence.get(cr, uid, 'stock.picking')
+		    		ptype_id = 1
+				sequence_id = self.pool.get('stock.picking.type').browse(cr, uid, ptype_id, context=context).sequence_id.id
+				pick_name = self.pool.get('ir.sequence').get_id(cr, uid, sequence_id, 'id', context=context)
+				
+				picking_id = stock_picking.create(cr, uid, {
+			    			'name': pick_name,
+			    			'origin': (production.origin or '').split(':')[0] + ':' + production.name,
+			    			'type': pick_type,
+			    			'move_type': 'one',
+			    			'state': 'draft',
+			    			'partner_id': partner_id,
+			    			'picking_type_id':1,
+			    			#'auto_picking': self._get_auto_picking(cr, uid, production),
+			   			'company_id': production.company_id.id,
+			})	
+				
+				production_line = production.move_created_ids2
+				line_id = self.pool.get('stock.move').create(cr, uid, {
+				        'name': production.name,
+				        'picking_id': picking_id,
+				        'product_id': production_line.product_id.id,
+				        #'product_qty': production_line.product_qty,
+				        'product_uom_qty': production_line.product_qty,
+				        'product_uom': production_line.product_uom.id,
+				        'product_uos_qty': production_line.product_qty,
+				        'product_uos': production_line.product_uos and production_line.product_uos.id or False,
+				        'date': time.strftime('%Y-%m-%d %H:%M:%S'),
+				        'move_dest_id': False,
+				        'location_id': routing_loc.id,
+				        'location_dest_id': 12,
+				        'state': 'assigned',
+				        'company_id': production.company_id.id,
+                })
+				#stock_picking.draft_force_assign(cr,uid,picking_id)
+# To create Invoices With Labour
+				fposition_id = False
+				invoice_obj = self.pool.get('account.invoice')
+				invoice_line_obj = self.pool.get('account.invoice.line')
+            			partner = self.pool.get('res.partner').browse(cr, 1, partner_id, context=context)
+#				labour_product = self.pool.get('product.product').search(cr, 1, [('parent_id', '=',production.product_id.id )], context=context)
+ #                               if not labour_product:
+#					labour_product = self.pool.get('product.product').search(cr, 1, [('name', '=', 'Job Work')], context=context)
+				res = self.pool.get('product.product').browse(cr,uid,labour_product[0])
+				fpos_obj = self.pool.get('account.fiscal.position')
+				fpos = fpos_obj.browse(cr, 1, fposition_id, context=context) or False
+
+				a = res.property_account_expense.id
+				if not a:
+					a = res.categ_id.property_account_expense_categ.id
+				a = fpos_obj.map_account(cr, 1, fpos, a)
+				if a:
+				    account_id = a
+                                taxes = res.supplier_taxes_id and res.supplier_taxes_id or (a and self.pool.get('account.account').browse(cr, 1, a, context=context).tax_ids or False)
+				tax_id = fpos_obj.map_tax(cr, 1, fpos, taxes)
+            			account_id = partner.property_account_payable.id
+            			payment_term = partner.property_supplier_payment_term.id or False
+			
+				invoice_id = invoice_obj.create(cr, 1, {
+				    'name': pick_name,
+				    'origin': (pick_name or '') + (production.origin or '').split(':')[0] + ':' + production.name,
+				    'account_id': account_id or 46,
+				    'journal_id': 2,
+				    'partner_id': partner_id,
+				    #'comment': comment,
+				    'payment_term': payment_term,
+				    'fiscal_position': partner.property_account_position.id,
+				    'date_invoice': time.strftime('%Y-%m-%d %H:%M:%S'),
+				    'company_id': production.company_id.id,
+				    'user_id': uid,
+				    'jobwork_invoice': True,
+				    'type': 'in_invoice',
+				    'production_id':production.id,
+				    
+				    
+        })
+				#pdb.set_trace()
+				
+				account_id = res.property_account_expense
+				if not account_id:
+					account_id = res.categ_id.\
+					property_account_expense_categ
+
+				
+				invoice_line_id = invoice_line_obj.create(cr, 1, {
+					'name': res.name,
+					'origin': pick_name,
+					'invoice_id': invoice_id,
+					#'uos_id': product_id.product_uos and product_id.product_uos.id or False,
+					'uos_id':res.uom_id.id or 1,
+					'product_id': res.id,
+					'account_id': account_id.id,
+					'price_unit': res.standard_price,
+					'invoice_line_tax_id':[(6,0, tax_id)],
+					#'account_analytic_id':1,
+					#'price_unit': self._get_price_unit_invoice(cr, uid, move_line, invoice_vals['type']),
+					#'discount': self._get_discount_invoice(cr, uid, move_line),
+					'quantity': production_line.product_qty,
+					#'invoice_line_tax_id': [(6, 0, self._get_taxes_invoice(cr, uid, move_line, invoice_vals['type']))],
+					#'account_analytic_id': self._get_account_analytic_invoice(cr, uid, picking, move_line),
+		})
+
+        return super(mrp_production_class,self).action_production_end(cr, uid, ids, context=context)
+
+mrp_production_class()
+
+class account_invoice_labour_class(osv.osv):
+
+    _inherit = "account.invoice"
+
+    def write(self, cr, uid, ids, vals, context=None):
+
+	if 'state' in vals:
+        	if vals.get('state') in ['paid']:
+			production_id = self.browse(cr,uid,ids).production_id
+			if production_id:
+				jbw = self.pool.get('job.work.order').search(cr,1, [('order', '=', production_id.id)])
+			        if jbw:
+					self.pool.get('job.work.order').write(cr,1,jbw,{'state':'work_order'})
+			  		
+
+        return super(account_invoice_labour_class, self).write(cr, uid, ids, vals, context=context)
+        
+    _columns = {
+
+	'jobwork_invoice': fields.boolean('Labour Invoices'),
+	'production_id':fields.many2one('mrp.production'),
+
+    }
+
+    _defaults = {
+	'jobwork_invoice': False,
+           }
+
+
+account_invoice_labour_class()
+
+
+
+

@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+  <data>
+
+<!-- To add new fields on sale order  -->
+        <record id="view_purchase_order_inherit_form" model="ir.ui.view">
+            <field name="name">purchase.order.form</field>
+            <field name="model">purchase.order</field>
+            <field name="inherit_id" ref="purchase.purchase_order_form"/>
+            <field name="arch" type="xml">
+             <xpath expr="//form/sheet/div/h1/label[@string='Request for Quotation ']" position="attributes">
+                    <attribute name="string">RFQ/PO </attribute>
+                </xpath>
+            <field name="date_order" position="before">
+            <field name="create_date" /> 
+            </field>
+
+                    <!--<button name="print_purchase_order" string="Print" type="object" states = "approved,done"  groups="base.group_user"/>
+-->
+           
+            </field>
+        </record>
+        
+        
+                
+               <report auto="False" id="purchase.report_purchase_order" model="purchase.order"
+                name="purchase.order" rml="psit_purchase/report/order.rml"
+                usage="default" string="Purchase Order"/>
+                
+                
+  </data> 
+</openerp> 

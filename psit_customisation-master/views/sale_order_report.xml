@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+     <data>	
+        <!-- Sale Order Report List View -->
+        <record id="sale_order_line_tree_inherited" model="ir.ui.view">
+            <field name="name">sale.order.line.tree</field>
+            <field name="model">sale.order.line</field>
+	    <field name="inherit_id" ref="sale.view_order_line_tree"/>
+            <field name="arch" type="xml">
+		<xpath expr="/tree" position="replace">
+		        <tree string="Sale Order Lines" create="false">
+		            <field name="name_order" string="SO No."/>
+		            <field name="date_order"  widget="date" string="SO Date"/>
+		            <field name="x_customer_po_no" string="PO No."/>
+		            <field name="product_id" string="Product"/>
+		            <field name="product_uom_qty" string="Quatity" help="Unit(s)"/>
+		            <field name="price_unit" string="Sales Price"/>
+		            <field name="tax_id" string="Taxes"/>
+		            <field name="price_subtotal" string="Sub Total"/>	
+                            <field name="state" string="Status"/>
+		        </tree>
+		</xpath>
+            </field>
+        </record>       
+         
+        <record id="sale_order_line_search_inherited_view" model="ir.ui.view">
+            <field name="name">sale.order.line.select</field>
+            <field name="model">sale.order.line</field>
+	    <field name="inherit_id" ref="sale.view_sales_order_line_filter"/>
+            <field name="arch" type="xml">
+                <xpath expr="//group" position="inside">
+                    <filter string="Customer" domain="[]" context="{'group_by':'partner_id'}"/>
+                </xpath>
+            </field>
+        </record>
+
+	<record model="ir.actions.act_window" id="action_sale_line_product_tree_new">
+            <field name="context">{}</field>
+            <field name="domain">[]</field>
+            <field name="name">Sale Order Report</field>
+            <field name="res_model">sale.order.line</field>
+            <field name="view_id" ref="sale_order_line_tree_inherited"/>
+        </record>
+
+	<menuitem name="Sale Order Report" id="menu_sale_order_reports"
+                  action="action_sale_line_product_tree_new" parent="base.menu_sales" sequence="7"/>
+
+
+     </data>	
+</openerp>

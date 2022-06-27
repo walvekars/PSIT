@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+
+        <report id="report_job_work_order_list" model="job.work.order" name="job.order"  rml="psit_jobwork_order/report/job_order.rml" string="Job Work Order" />
+        
+    </data>
+</openerp>
+

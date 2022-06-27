@@ -1,0 +1,219 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+	<data>
+
+        <record id="product.product_template_tree_view" model="ir.ui.view">
+            <field name="name">product.product.tree</field>
+            <field name="model">product.template</field>
+            <field eval="7" name="priority"/>
+            <field name="arch" type="xml">
+                <tree string="Product Variants">
+                    <field name="default_code"/>
+                    <field name="name"/>
+                    <field name="categ_id"/>
+                    <field name="type"/>
+                    <field name="lst_price" string="Sale Price"/>
+		    <field name="state" invisible="1"/>
+                    <field name="price" invisible="not context.get('pricelist',False)"/>
+                    <field name="uom_id"/>
+                    <field name="ean13"  invisible="1"/>
+                </tree>
+            </field>
+        </record>
+
+
+
+
+        <menuitem id="stock_product_variant_action" action="product.product_normal_action_sell" parent="stock.menu_stock_product"  sequence="99"/>
+<!-- To add new fields on Product Page -->
+        <record id="view_product_product_inherit_form" model="ir.ui.view">
+            <field name="name">product.product.form</field>
+            <field name="model">product.product</field>
+            <field name="inherit_id" ref="product.product_normal_form_view"/>
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='list_price']" position="after">
+                    <field name="x_regular_discount" />
+		    <field name="x_special_discount"/>
+		    <field name="x_dealer_discount"/>
+		   <field name="x_oem_discount"/>
+		    <field name="type_dump" invisible="1"/>
+                </xpath>
+            </field>
+   </record>
+
+        <record id="view_product_template_inherit_form" model="ir.ui.view">
+            <field name="name">product.template.form</field>
+            <field name="model">product.template</field>
+            <field name="inherit_id" ref="product.product_template_only_form_view"/>
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='list_price']" position="after">
+                    <field name="x_regular_discount" />
+		    <field name="x_special_discount"/>
+		    <field name="x_dealer_discount"/>
+		   <field name="x_oem_discount"/>
+                   <field name="type_dump" invisible="1"/>               
+                </xpath>
+            </field>
+   </record>
+
+<!-- To add esugam no. fields on Customer form -->
+        <record id="invoice_customer_form_inherit_id" model="ir.ui.view">
+         <field name="name">account.invoice.customer.form</field>
+         <field name="model">account.invoice</field>
+         <field name="inherit_id" ref="account.invoice_form"/>
+         <field name="arch" type="xml">
+		<xpath expr="//field[@name='fiscal_position']" position="after">
+                    <field name="x_esugam_no" required = "1" />
+                    <field name="x_customer_po_no" required = "1" size="100"/>
+                    <field name="x_customer_po_date" required = "1" />
+                </xpath>
+            </field>
+         </record>
+
+
+    <!-- change mandatory fields on invoice Page -->
+        <record id="invoice_supplier_form_inherit" model="ir.ui.view">
+            <field name="name">account.invoice.supplier.form</field>
+            <field name="model">account.invoice</field>
+            <field name="inherit_id" ref="account.invoice_supplier_form"/>
+            <field name="arch" type="xml">
+  
+                <field name="date_invoice" position="replace">
+                <field name="date_invoice"  required = "1" />
+                </field>
+
+		<field name="fiscal_position" position="replace">
+		<field name="fiscal_position" required = "1"  widget="selection"/>
+		</field>
+
+	        <field name="supplier_invoice_number" position="replace">
+	        <field name="supplier_invoice_number" required = "1" />
+		</field>
+
+               
+                <xpath expr="//field[@name='invoice_line']/tree/field[@name='quantity']" position="replace">
+                    <field name="quantity" on_change="onchange_prdt_quantity(quantity,price_unit)"/>
+		 </xpath>
+
+                <xpath expr="//field[@name='invoice_line']/tree/field[@name='invoice_line_tax_id']" position="after">
+                    <field name="invoice_amount" string = "Amount" on_change="onchange_invoice_amount(invoice_amount,quantity)"/>
+		 </xpath>
+
+                <xpath expr="//field[@name='invoice_line']/tree/field[@name='price_subtotal']" position="replace">
+		 <field name="price_subtotal" invisible = "0"/>
+		 </xpath>
+
+                 <!-- price unit precision -->
+                 <xpath expr="//field[@name='invoice_line']/tree/field[@name='price_unit']" position="replace">
+		    <field name="price_unit" digits="(14, 2)"/>
+		 </xpath>   
+
+            </field>
+        </record>
+
+<!-- To add new field on Invoice Line object -->
+        <record model="ir.ui.view" id="view_account_invoice_form_line_inherit_id">
+            <field name="name">account.invoice.line.form</field>
+            <field name="model">account.invoice.line</field>
+            <field name="inherit_id" ref="account.view_invoice_line_form"/>
+            <field name="arch" type="xml">
+
+                <field name="quantity" position="replace">
+                     <field name="quantity" on_change="onchange_prdt_quantity(quantity,price_unit)" />
+                </field>
+
+                <field name="uos_id" position="after">
+                     <field name="price_unit" />
+                </field>
+
+                <field name="account_id" position="after">
+                     <field name="invoice_amount" string ="Amount" on_change="onchange_invoice_amount(invoice_amount,quantity)"/>
+                </field>
+
+            </field>
+        </record>
+
+        <record model="ir.ui.view" id="account_invoice_tree_customer_inherit_id">
+            <field name="name">account.invoice.customer.tree</field>
+            <field name="model">account.invoice</field>
+            <field name="inherit_id" ref="account.invoice_form"/>
+            <field name="arch" type="xml">
+
+
+                <xpath expr="//field[@name='invoice_line']/tree/field[@name='quantity']" position="replace">
+                    <field name="quantity" on_change="onchange_prdt_quantity(quantity,price_unit)" />
+		 </xpath>
+
+                     <xpath expr="//field[@name='invoice_line']/tree/field[@name='invoice_line_tax_id']" position="after">
+                    <field name="invoice_amount" string ="Amount" on_change="onchange_invoice_amount(invoice_amount,quantity)" />
+		 </xpath>
+
+                <xpath expr="//field[@name='invoice_line']/tree/field[@name='price_subtotal']" position="replace">
+		 <field name="price_subtotal" invisible = "1" />
+		 </xpath>
+
+                 <xpath expr="//field[@name='invoice_line']/tree/field[@name='price_unit']" position="replace">
+		    <field name="price_unit" digits="(14, 2)"/>
+		 </xpath>   
+
+            </field>
+        </record>
+
+<!--To add new  on Product Pag field on customer and Supplier form -->
+        <record id="res_partner_form_inherit_idz" model="ir.ui.view">
+            <field name="name">res.partner.form</field>
+            <field name="model">res.partner</field>
+            <field name="inherit_id" ref="account.view_partner_property_form"/>
+            <field name="arch" type="xml">
+                 <xpath expr="//field[@name='property_account_position']" position="after">
+                    <field name="vat"/>
+
+                </xpath>
+            </field>
+        </record>
+
+
+   <record id="acc_voucher_form_view" model="ir.ui.view">     
+     <field name="name">account.voucher.receipt.dialog.form</field>
+            <field name="model">account.voucher</field> 
+           <field name="inherit_id" ref="account_voucher.view_vendor_receipt_dialog_form"/>
+            <field name="arch" type="xml">
+		<xpath expr="//field[@name='reference']" position="after">
+                    <field name="x_instrument" required = "1" String="Instrument" />
+                </xpath>
+
+		<xpath expr="//field[@name='reference']" position="attributes">
+   			 <attribute name="required">True</attribute>
+                </xpath>
+
+            </field>
+      </record>
+      
+           <record id="view_move_form_inherit_job" model="ir.ui.view">
+            <field name="name">stock.move.form.inherit</field>
+            <field name="model">stock.move</field>
+            <field name="inherit_id" ref="stock.view_move_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='name']" position="after">
+                    <field name="job_id" attrs="{'invisible':[('picking_type_id','!=',2)]}" />
+		    <field name="picking_type_id" invisible="1" />
+                </xpath>
+            </field>
+        </record>
+
+
+	  <record id="view_move_picking_form_inherit_job" model="ir.ui.view">
+            <field name="name">stock.move.form.inherit</field>
+            <field name="model">stock.move</field>
+            <field name="inherit_id" ref="stock.view_move_picking_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='name']" position="after">
+                    <field name="job_id" attrs="{'invisible':[('picking_type_id','!=',2)]}" />
+		    <field name="picking_type_id" invisible="1"  />
+                </xpath>
+            </field>
+        </record>
+	
+
+	</data>
+</openerp>

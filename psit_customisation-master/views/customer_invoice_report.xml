@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+     <data>
+	<!-- Customer Invoice Report List View-->
+        <record id="customer_invoice_tree_inherited" model="ir.ui.view">
+            <field name="name">account.invoice.line.tree</field>
+            <field name="model">account.invoice.line</field>
+	    <field name="inherit_id" ref="account.view_invoice_line_tree"/>
+            <field name="arch" type="xml">
+		<xpath expr="/tree" position="replace">
+		        <tree string="Invoice Lines" create="false">
+                            <field name="invoice_number" string="Invoice Number"/>
+                            <field name="invoice_date"/>
+                            <field name="partner_id" string="Cusotmer"/>
+                            <field name="partner_gst_number"  string="GST Number"/>
+                            <field name="product_id" string="Product"/>
+                            <field name="quantity" string = "Quantity" help="Unit(s)"/>
+                            <field name="price_unit" string="Unit Price"/> 
+                            <field name="price_subtotal" string="Sub Total"/>                                             
+			    <field name="state" string="Invoice Status"/>
+		        </tree>
+		</xpath>
+            </field>
+        </record>
+        
+         <record id="view_invoice_line_form_inherited" model="ir.ui.view">
+            <field name="name">account.invoice.line.form.inherited</field>
+            <field name="model">account.invoice.line</field>            
+	    <field name="inherit_id" ref="account.view_invoice_line_form"/>
+            <field name="priority" eval="20"/>
+            <field name="arch" type="xml">
+		<xpath expr="/form" position="replace">
+                <form string="Invoice Line" create="false">
+                    <group>
+                        <group>
+                            <field name="product_id"
+                                 context="{'partner_id': parent.partner_id}"/>
+                            <label for="quantity"/>
+                             <div>
+                                <field name="quantity" class="oe_inline"/>
+                             </div>
+                            <field name="price_unit"/>
+                            <field name="invoice_id"/>
+                            <field name="invoice_number" string="Invoice Number"/>
+                        </group>
+                    <group>
+                            <field domain="[('company_id', '=', parent.company_id)]" name="account_id" groups="account.group_account_user"/>
+                          <field domain="[('company_id', '=', parent.company_id)]" name="account_analytic_id" groups="analytic.group_analytic_accounting"/>
+                            <field name="company_id" groups="base.group_multi_company" readonly="1"/>
+                        </group>
+                    </group>
+                    <label for="name"/>
+                    <field name="name"/>
+                </form>
+            </xpath>
+            </field>
+        </record>
+        
+        <record id="account_invoice_line_search" model="ir.ui.view">
+            <field name="name">account.invoice.line.search</field>
+            <field name="model">account.invoice.line</field>
+            <field name="arch" type="xml">
+                <search string="Search Customer invoice Order">
+                    <field name="invoice_id"/>
+                    <field name="product_id"/>
+                    <field name="invoice_number" />
+                    <group expand="0" string="Group By">
+                        <filter name="groupby_supplier" string="Customer" domain="[]" context="{'group_by' : 'partner_id'}" />
+                        <filter name="groupby_product" string="Product" domain="[]" context="{'group_by' : 'product_id'}" />
+                        <filter name="invoice_date" string = "Invoice Date" domain="[]" context = "{'group_by': 'invoice_date'}" />
+                        <filter string="Order Reference" domain="[]" context="{'group_by' :'invoice_id'}"/>
+                        <filter string="Status" domain="[]" context="{'group_by' : 'state'}" />
+                    </group>
+                </search>
+            </field>
+        </record>        
+
+	<record model="ir.actions.act_window" id="action_customer_invoice_tree_new">
+            <field name="name">Customer Invoice Report</field>
+            <field name="res_model">account.invoice.line</field>
+            <field name="domain">[]</field>
+            <field name="view_id" ref="customer_invoice_tree_inherited"/>
+        </record>
+
+	<menuitem name="Customer Invoice Report" id="menu_customer_invoice_reports"
+                  action="action_customer_invoice_tree_new" parent="account.menu_action_invoice_tree1" sequence="2"/>
+
+
+     </data>	
+</openerp>

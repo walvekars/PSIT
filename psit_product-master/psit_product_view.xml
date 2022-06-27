@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+	<data>
+
+         <record id="view_psit_product_inherit_form" model="ir.ui.view">
+            <field name="name">psit.product.product.form</field>
+            <field name="model">product.template</field>
+            <field name="inherit_id" ref="product.product_template_form_view"/>
+            <field name="arch" type="xml">
+           	
+				<!-- <xpath expr="//field[@name='categ_id']"  position="attributes">
+					<attribute name="on_change">onchange_categ_id(categ_id)</attribute>
+				</xpath>    
+				 -->
+				      
+                  <xpath expr="//notebook/page[@string='Information']/group/group/field[@name='list_price']" position="after">
+ 		
+                       
+                        <field name="product_hsn_code" /> 
+                  </xpath>
+                  
+                  
+	                 
+                  
+              
+                
+            </field>
+   		</record>
+            
+            <record id="psit_invoice_form" model="ir.ui.view">
+            <field name="name">psit.invoice_form</field>
+            <field name="inherit_id" ref="account.invoice_form"/>
+            <field name="model">account.invoice</field>
+            <field name="arch" type="xml" >
+               <field name="fiscal_position" position="after">
+                   <field name="partner_shipping_id"   context="{'default_type':'delivery'}"/>
+                   <field name="date_of_supply" /> 	 	
+               </field>   
+               
+               <field name="account_id" position="after">
+			<field name="transportation_mode"  />
+			<field name="vehicle_num"  />
+			<field name="electronic_reference_num"  />
+               	
+               </field>	
+               
+               
+               	
+        
+        
+        		<xpath expr="//notebook/page[@string='Invoice Lines']/field[@name='invoice_line']/tree/field[@name='invoice_line_tax_id']" position="replace">
+ 		
+                       <field name="invoice_line_tax_id" widget="many2many_tags" context="{'type':parent.type}"
+                                        domain="[('parent_id','=',False),('company_id', '=', parent.company_id)]"/>
+                                    </xpath>  
+		<xpath expr="//notebook/page[@string='Invoice Lines']/field[@name='invoice_line']/tree/field[@name='name']" position="after">
+			<field name="product_hsn_code"  />
+			<field name="cgst"  invisible="1"/> 
+			<field name="sgst"  invisible="1"/> 
+			<field name="igst"  invisible="1"/> 
+		</xpath>  	
+        	
+        	 	
+   			</field>
+		</record>
+                
+                <record id="psit_company_view" model="ir.ui.view">
+                    <field name="name">psit.res.company.form</field>
+                    <field name="model">res.company</field>
+                    <field name="inherit_id" ref="base.view_company_form"/>
+                    <field name="arch" type="xml">                  
+                  
+                  <xpath expr="//field[@name='company_registry']" position="after">
+                  	
+                  	<field name="cin_no"/>
+                </xpath>
+
+			</field>
+			</record>
+                        
+            <record id="view_sale_order_inherit_form" model="ir.ui.view">
+            <field name="name">sale.order.form</field>
+            <field name="model">sale.order</field>
+            <field name="inherit_id" ref="sale.view_order_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='order_line']/form//field[@name='product_id']" position="after">
+                     
+			<field name="product_hsn_code"/>
+                       
+                   </xpath>
+                   
+                   <xpath expr="//field[@name='order_line']/tree//field[@name='product_id']" position="after">
+                      
+                   <field name="product_hsn_code"/>	   
+                   
+                   </xpath>
+                   
+                   
+               </field>
+                
+                
+            </record>
+                
+          
+                
+
+	</data>
+</openerp>

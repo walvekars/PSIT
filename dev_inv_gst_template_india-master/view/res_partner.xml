@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+
+    <data>
+   		 <record id="res_partner_gst_number_add" model="ir.ui.view">
+         <field name="name">res.partner.gst.number.add</field>
+         <field name="model">res.partner</field>
+	     <field name="inherit_id" ref="account.view_partner_property_form"/>
+         <field name="arch" type="xml">
+             <xpath expr="//field[@name='property_account_position']" position="after">
+		               <field name="partner_gst_number"  />
+				<field name="gst_reverse_charge"  />
+        	</xpath>
+      </field>
+    </record>
+
+
+    <record id="res_company_gst_number_add" model="ir.ui.view">
+         <field name="name">res.partner.gst.number.add</field>
+         <field name="model">res.company</field>
+	 <field name="inherit_id" ref="base.view_company_form"/>
+         <field name="arch" type="xml">
+		<xpath expr="//sheet/notebook/page/group/group[2]/field[@name='company_registry']" position="replace">
+			<field name="company_registry"  string="GSTIN No."/> 
+		</xpath>
+      </field>
+    </record>
+    
+    
+    
+
+  </data>
+</openerp>

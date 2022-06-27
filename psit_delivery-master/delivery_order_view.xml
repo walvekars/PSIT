@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+	<data>
+
+<!-- To add new fields on Delivery Page -->
+        <record id="view_delivery_out_inherit_form1" model="ir.ui.view">
+            <field name="name">stock.picking.form</field>
+            <field name="model">stock.picking</field>
+            <field name="inherit_id" ref="stock.view_picking_form"/>
+            <field name="arch" type="xml">
+                 <field name="partner_id" position="before">
+ 			<field name="do_seq" attrs="{'invisible':[('picking_type_id','!=',2)]}"/>
+ 			<field name="partner_id" attrs="{'invisible':[('partner_id','!=',2)]}"/>
+                </field>
+            </field>
+   </record>
+<!--
+    Sequence Change for Incoming Shipment
+    -->
+
+        <!--<record id="stock.seq_picking_in" model="ir.sequence">
+            <field name="name">Picking IN</field>
+            <field name="code">stock.picking.in</field>
+            <field name="prefix">GRN/</field>
+            <field name="padding">5</field>
+            <field name="company_id" eval="False"/>
+        </record>-->
+        
+        
+<!--
+    New Sequence types for delivery
+    -->
+
+       <record id="seq_type_picking_out_new" model="ir.sequence.type">
+            <field name="name">Delivery Order</field>
+            <field name="code">do.psit.seq</field>
+        </record>
+
+        <record id="seq_picking_out_new" model="ir.sequence">
+            <field name="name">Delivery Order</field>
+            <field name="code">do.psit.seq</field>
+            <field name="prefix">PSIT/DC/</field>
+            <field name="padding">5</field>
+            <field name="company_id" eval="False"/>
+        </record>
+
+<!--
+    Traceability in stock moves only to warehouse manager
+    --> 
+	<menuitem action="stock.action_move_form2" id="stock.menu_action_move_form2" parent="stock.menu_traceability" sequence="3" groups="stock.group_stock_manager"/>
+
+<!--
+    Replacing Delivery Report id to generate in new format
+    --> 
+
+<!--<report id="stock.report_picking_list_out" model="stock.picking.out" name="stock.picking.list.out" string="Delivery Challan" rml="psit_delivery/report/picking.rml"/>-->
+
+
+	</data>
+</openerp>

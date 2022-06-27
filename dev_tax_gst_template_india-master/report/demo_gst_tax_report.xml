@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+        <template id="gst_tax_template_report_main">
+             <t t-call="dev_tax_gst_template_india.external_layout_tax">
+                    <div class="page">
+<style type="text/css">
+
+.table-bordered {
+    border: 1px solid black;
+}
+
+.table-bordered tr td{
+    border: 1px solid black;
+}
+
+.table-bordered thead tr th, .table-bordered tbody tr th, .table-bordered tfoot tr th, .table-bordered thead tr td, .table-bordered tbody tr td, .table-bordered tfoot tr td {
+    border: 1px solid black;
+}
+
+
+</style>
+                   <div class="row" style="font-size:12px">
+                        <div class="col-xs-12">
+                            <table class="table table-bordered">
+                                <tr>
+                                    <td colspan="20">
+                                        <center><h3>
+					    <t t-if="o.type == 'out_invoice'">
+					         GST ON SALES / Tax Payable
+					    </t>
+			        <t t-if="o.type != 'out_invoice'">								
+						GST ON PURCHASES / Tax Recievable
+                                  </t>
+					</h3></center>
+                                    </td>
+                               </tr>
+
+                            <tr>
+                                <td width="2%" rowspan="2"><b>No</b></td>
+                                <td width="30%" rowspan="2" colspan="3"><b>Product</b></td>
+                                <td width="10%" rowspan="2"><b>HSN/SAC Code</b></td>
+                                <td width="10%" rowspan="2"><b>Invoice Date</b></td>
+                                <td width="10%" rowspan="2"><b>Invoice No</b></td>
+                                <td width="10%" rowspan="2"><b>Sales Price</b></td>
+                                <td width="3%" rowspan="2"><b>Qty</b></td>
+                                <td width="10%" rowspan="2"><b>Taxable values</b></td>
+                                <td width="10%" colspan="2" align="center"><b>CGST</b></td>
+                                <td width="10%" colspan="2" align="center"><b>SGST</b></td>
+                                <td width="10%" colspan="2" align="center"><b>IGST</b></td>                                
+                                <td width="10%" rowspan="2"><b>Total Taxable Values</b></td>
+                                <td width="10%" rowspan="2"><b>Total CGST</b></td>
+                                <td width="10%" rowspan="2"><b>Total SGST</b></td>
+                                <td width="10%" rowspan="2"><b>Total IGST</b></td>
+                            </tr>
+
+                            <tr>
+                                <td width="5%" align="center"><b>Rate</b></td>
+                                <td width="5%" align="center"><b>Amount</b></td>
+                                <td width="5%" align="center"><b>Rate</b></td>
+                                <td width="5%" align="center"><b>Amount</b></td>
+                                <td width="5%" align="center"><b>Rate</b></td>
+                                <td width="5%" align="center"><b>Amount</b></td>
+                            </tr>
+
+                             <tr t-foreach="o.invoice_line" t-as="l">
+                                <td> <t t-esc="l_index+1"/></td>
+                                <td colspan="3"><t t-esc="l.product_id.product_tmpl_id.name"/></td>
+                                <td><t t-esc="l.product_id.product_tmpl_id.product_hsn_code"/></td>
+                                <td> <span t-field="o.date_invoice" t-field-options="{&quot;format&quot;: &quot;dd-MM-yyyy&quot;}" /> </td>
+                                <td><t t-esc="o.number"/></td> 
+                                <td align="right">
+                                    <span t-field="l.price_unit" t-field-options='{"widget": "monetary", "display_currency": "o.currency_id"}'/>
+                                </td>
+                                <td> 
+                                    <span t-field="l.quantity"/>
+                                </td>
+
+                                <td align="right">
+                                    <span t-field="l.price_subtotal" t-field-options='{"widget": "monetary", "display_currency": "o.currency_id"}'/>
+                                </td>
+                                <td><span t-esc="int(l.cgst_rate)"/>%</td>
+                                <td align="right"><span t-field="l.cgst" t-field-options='{"widget": "monetary", "display_currency": "o.currency_id"}'/></td>
+                                <td><span t-esc="int(l.sgst_rate)"/>%</td>
+                                <td align="right"><span t-field="l.sgst" t-field-options='{"widget": "monetary", "display_currency": "o.currency_id"}'/></td>
+                                <td><span t-esc="int(l.igst_rate)"/>%</td>
+                                <td align="right"><span t-field="l.igst" t-field-options='{"widget": "monetary", "display_currency": "o.currency_id"}'/></td>
+                                <td>-</td>
+                                <td>-</td>
+                                <td>-</td>
+                                <td>-</td>
+                             </tr>
+
+			      <tr>
+                                <td  colspan="16"/>
+                                <td  align="center"><span t-field="o.amount_untaxed" t-field-options='{"widget": "monetary", "display_currency": "o.currency_id"}'/></td>
+                                <td  align="center"><span t-esc="o.amount_cgst" t-field-options='{"widget": "monetary", "display_currency": "o.currency_id"}'/></td>
+                                <td  align="center"><span t-esc="o.amount_sgst" t-field-options='{"widget": "monetary", "display_currency": "o.currency_id"}'/></td>
+                                <td  align="center"><span t-esc="o.amount_igst" t-field-options='{"widget": "monetary", "display_currency": "o.currency_id"}'/></td>
+                              </tr>
+
+                            <tr>
+                                <td colspan="18"/>
+                                <td align="right"><b>Total Tax:</b></td>
+                                <td align="right"><span t-field="o.amount_tax" t-field-options='{"widget": "monetary", "display_currency": "o.currency_id"}'/></td>
+                            </tr>
+
+
+                        </table>           
+                        </div>
+                </div>
+                 </div>
+            </t>
+                 
+        </template>
+         <template id="gst_tax_template_report_id">
+            <t t-call="report.html_container">
+                <t t-foreach="doc_ids" t-as="doc_id">
+                    <t t-raw="translate_doc(doc_id, doc_model,'partner_id.lang', 'dev_tax_gst_template_india.gst_tax_template_report_main')"/>
+                </t>
+            </t>
+        </template>    
+        
+    </data>
+</openerp>
+

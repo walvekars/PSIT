@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+  <data>
+
+        <!--sale.order report chnages -->
+             <!--<report auto="False" id="sale.report_sale_order" model="sale.order" name="sale.order"
+                rml="psit_sale/report/sale_order.rml" string="Quotation / Order"
+                usage="default"/>  -->         
+                
+        <!-- New Sequences for sale.order -->
+        <record id="seq_type_sale_order_confirmed" model="ir.sequence.type">
+            <field name="name">Sales Order Confirmation</field>
+            <field name="code">sale.order.confirmed</field>
+        </record>
+
+        <record id="seq_sale_order_confirmation" model="ir.sequence">
+            <field name="name">Sales Order Confirmation</field>
+            <field name="code">sale.order.confirmed</field>
+            <field name="prefix">QTN-</field>
+            <field name="padding">3</field>
+            <field name="company_id" eval="False"/>
+        </record>
+
+     
+        <record id="sale.seq_sale_order" model="ir.sequence">
+            <field name="name">Sales Order</field>
+            <field name="code">sale.order</field>
+            <field name="prefix">SO-</field>
+            <field name="padding">3</field>
+            <field name="company_id" eval="False"/>
+        </record>
+        
+     
+        <record id="sale.view_quotation_tree" model="ir.ui.view">
+            <field name="name">sale.order.tree</field>
+            <field name="model">sale.order</field>
+            <field name="priority">4</field>
+            <field name="arch" type="xml">
+                <tree string="Quotation" fonts="bold:message_unread==True" colors="grey:state=='cancel';blue:state in ('waiting_date','manual');red:state in ('invoice_except','shipping_except')">
+                    <field name="message_unread" invisible="1"/>
+                    <field name="qtn_sequence" string="Quotation Number"/>
+                    <field name="date_order"/>
+                    <field name="partner_id"/>
+                    <field name="user_id"/>
+                    <field name="amount_total" sum="Total Tax Included"/>
+                    <field name="state"/>
+                </tree>
+            </field>
+        </record>
+           
+        
+<!-- To add new fields on sale order  -->
+    <record id="view_sale_order_inherit_form" model="ir.ui.view">
+        <field name="name">sale.order.form</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.view_order_form"/>
+        <field name="arch" type="xml">
+          <field name="name" position ="replace">
+            <field name="name" class="oe_inline" readonly="1"  attrs="{'invisible': [('state','in',('draft','sent'))]}"/>
+          </field>
+          <field name="name" position ="after">
+            <field name="qtn_sequence" class="oe_inline" readonly="1"  attrs="{'invisible': [('state','not in',('draft','sent'))]}"/>
+          </field>
+          <xpath expr="//page[@string='Order Lines']/field[@name='order_line']/form[@string='Sales Order Lines']/group/group/field[@name='product_id']" position="after">
+
+            <field name="qty_onhand"/>
+          </xpath>
+
+        <xpath expr="//page[@string='Order Lines']/field[@name='order_line']/form[@string='Sales Order Lines']/field[@name='name']" position="after">
+
+          <label for="product_bom"/>
+          <!-- <button name="update_bom" string="Update BOM" type="object"  groups="base.group_user"/> -->
+            <field name="product_bom" widget="many2many" context="{'so_line_id':id,'product_id': product_id,'product_uom_qty': product_uom_qty,}" >
+
+              <tree string="BoM Structure" colors="blue:child_bom_id" >
+              <field name="child_bom_id" invisible="1"  />
+              <field name="bom_id"/>
+              <field name="product_id"/>
+              <field name="product_qty"  />
+            <field name="cost"/>
+              <!--<field name="product_bom_qty" />-->
+              <field name="product_qty_new3" context="{'oldqty':qty_onhand}"/>
+              <field name="qty_onhand"/>
+              <field name="incoming_qty"/>
+              <field name="qty_difference" />
+              <field name="max_lead"/>
+
+              <field name="product_uom" groups="product.group_uom"/>
+              </tree>
+            </field>
+        </xpath>
+
+        <xpath expr="//page[@string='Order Lines']/field[@name='order_line']/tree[@string='Sales Order Lines']/field[@name='product_uom']" position="after">
+             <field name="qty_onhand"/>
+        </xpath>
+
+        </field>
+    </record>
+
+   
+         <!-- <record id="mrp_bom_sale_order_tree_view" model="ir.ui.view">
+            <field name="name">mrp.bom.so.tree</field>
+            <field name="model">mrp.bom</field>
+            <field name="field_parent">child_complete_ids</field>
+            <field name="arch" type="xml">
+                <tree string="BoM Structure" colors="blue:child_bom_id" >
+                		<field name="child_bom_id" invisible="1"  />
+				<field name="product_id"/>
+				<field name="product_qty" invisible="1" />
+				<field name="product_bom_qty"/>
+				<field name="qty_onhand"/>
+				<field name="qty_difference" />
+				<field name="max_lead"/>
+				<field name="bom_id"/>
+				<field name="method" invisible="1" />
+				<field name="product_uom" groups="product.group_uom"/>
+                </tree>
+            </field>
+        </record> -->
+        
+        <record id="inherit_mrp_production_form_view" model="ir.ui.view">
+            <field name="name">mrp.production.form</field>
+            <field name="model">mrp.production</field>
+            <field name="inherit_id" ref="mrp.mrp_production_form_view"/>
+            <field name="arch" type="xml">
+                         <field name="bom_id" position = "replace" >
+ 		 		<field name="bom_id" domain="[('product_id','=',product_id)]" context="{'default_product_id': product_id}" on_change="bom_id_change(bom_id)" required="1" attrs="{'invisible':[('state','=','done')]}" />
+ 		 	</field>
+ 		 		
+ 		 	<field name="routing_id" position = "replace" >
+                            <field name="routing_id" class="oe_inline" groups="mrp.group_mrp_routings" attrs="{'invisible':[('state','=','done')]}"/>
+
+                       </field>
+                 
+                 <field name="routing_id" position = "after" >
+                            <field name="refer_routing" class="oe_inline" groups="mrp.group_mrp_routings" attrs="{'invisible':[('state','!=','done')]}"/>
+
+                       </field>
+                       
+                </field>
+   </record>
+           <record id="view_order_form_inheritextnd" model="ir.ui.view">
+            <field name="name">sale.order.form.sale.stock</field>
+            <field name="model">sale.order</field>
+            <field name="inherit_id" ref="sale_stock.view_order_form_inherit"/>
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='product_uom_qty']" position="replace">
+                       <field context="{'partner_id':parent.partner_id, 'quantity':product_uom_qty, 'pricelist':parent.pricelist_id, 'uom':product_uom}"
+                             name="product_uom_qty"
+                       on_change="change_for_bom(parent.pricelist_id,product_id,product_uom_qty,product_uom,product_uos_qty,False,name,parent.partner_id, False, False, parent.date_order, product_packaging, parent.fiscal_position, True, context)"/>
+                   </xpath>
+            </field>
+        </record>
+   
+  </data> 
+</openerp> 

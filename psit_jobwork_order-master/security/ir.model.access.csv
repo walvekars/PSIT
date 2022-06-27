@@ -1,0 +1,5 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_job_wor_order_move_user,job.work.order.user,model_job_work_order,purchase.group_purchase_user,1,1,1,0
+access_job_work_order_line_user,job.work.order.line.user,model_job_work_order_line,purchase.group_purchase_user,1,1,1,0
+access_job_wor_order_move_production_user,job.work.order.production.user,model_job_work_order,mrp.group_mrp_user,1,1,1,0
+access_job_work_order_line_production_user,job.work.order.line.production.user,model_job_work_order_line,mrp.group_mrp_user,1,1,1,0

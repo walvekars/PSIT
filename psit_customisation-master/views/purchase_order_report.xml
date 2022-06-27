@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+     <data>	
+	 <!-- Purchase Order Report List View -->
+        <record id="purchase_order_line_tree_inherited" model="ir.ui.view">
+            <field name="name">purchase.order.line.tree</field>
+            <field name="model">purchase.order.line</field>
+	    <field name="inherit_id" ref="purchase.purchase_order_line_tree"/>
+            <field name="arch" type="xml">
+		<xpath expr="/tree" position="replace">
+		        <tree string="Purchase Order Lines" create="false">
+			    <field name="partner_id" string="Suppleir"/> 
+		            <field name="name_order" string="PO No"/>
+		            <field name="date_planned"  widget="date" string="PO Date"/>
+			    <field name="product_id" string="Product"/>			
+		            <field name="product_qty" string="PO Qty"/>
+		            <field name="price_unit" string="Rate"/>
+		            <field name="taxes_id" string="Taxes"/>
+		            <field name="price_subtotal" string="Sub Total"/> 
+                            <field name="state" string="Status"/>          
+		        </tree>
+		</xpath>
+            </field>
+        </record>
+
+	<record model="ir.actions.act_window" id="action_purchase_line_product_tree_new">
+            <field name="context">{}</field>
+            <field name="domain">[('state','in',['done','purchase'])]</field>
+            <field name="name">Purchase Order Report</field>
+            <field name="res_model">purchase.order.line</field>
+            <field name="view_id" ref="purchase_order_line_tree_inherited"/>
+        </record>
+
+	<menuitem name="Purchase Order Report" id="menu_purchase_order_reports"
+                  action="action_purchase_line_product_tree_new" parent="purchase.menu_purchase_form_action" sequence="7"/>
+     </data>	
+</openerp>
